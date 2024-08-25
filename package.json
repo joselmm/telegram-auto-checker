@@ -1,0 +1,30 @@
+{
+  "name": "telegram-auto-checker",
+  "version": "1.0.0",
+  "description": "Este proyecto es para automatizar el checkar tarjetas con puppeteer",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joselmm/telegram-auto-checker.git"
+  },
+  "keywords": [
+    "puppeeter",
+    "cards",
+    "checker"
+  ],
+  "author": "joselmm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joselmm/telegram-auto-checker/issues"
+  },
+  "homepage": "https://github.com/joselmm/telegram-auto-checker#readme",
+  "dependencies": {
+    "express": "^4.19.2",
+    "node-fetch": "^2.7.0",
+    "puppeteer": "^23.1.1"
+  }
+}
