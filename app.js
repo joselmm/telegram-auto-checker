@@ -2,15 +2,26 @@ import puppeteer from 'puppeteer';
 
 // Or import puppeteer from 'puppeteer-core';
 import express from "express";
-import fs, { fsyncSync } from "fs";
+import { readFile, writeFile } from 'node:fs/promises';
 import path from "path";
 import fetch from "node-fetch";
+import {generateCardFromString} from "./GenCard.js";
+import { resolve } from 'node:path';
+
+
+const bins = ["43561902140xxxxx|03|2029|rnd"];
+var gate = ".ap";
+var checking = [];
 
 const app = express()
 const port = 3000;
 var qrSaved = false;
 var logged = false;
 var chat_id="#-1002235041204"
+var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
+
+var maxCurrent = 2;
+
 
 // Launch the browser and open a new blank page
 const browser = await puppeteer.launch({headless:false, defaultViewport: null,
@@ -51,6 +62,19 @@ page.on('dialog', async (dialog) => {
 
 // Set screen size.
 
+async function antibot() {
+  var soyHumanoIndex=await page.evaluate(()=>{
+    var soyHumanoIndex = Array.from(document.querySelectorAll("#message-1409 > div.message-content-wrapper.can-select-text > div.InlineButtons > div > button")).findIndex(e=>e.innerText==='Soy aHumano ');
+    if(soyHumanoIndex>=0){
+      return soyHumanoIndex+1
+    }
+    return null
+  });
+  if(soyHumanoIndex!==null && soyHumanoIndex>=1){
+    await page.click();
+  }
+}
+
 /* MANEJAR TARJETAS */
 manejarTarjetas();
 async function manejarTarjetas() {
@@ -60,18 +84,106 @@ async function manejarTarjetas() {
     return true
   }, chat_id)
   */
-    await page.waitForNavigation('#editable-message-text');
+  var queue = [];
+  async function interval(){
+    var startTime=Date.now();
+
+    antibot();
+    
+/*     var checkingCards=await getCheckingCards();
+    console.log("checking cards: ",checkingCards) */
+    var cardsStatuses= await getCardsStatuses();
+
+    console.log(cardsStatuses)
+    console.log(queue)
+    /* for (let i = 0; i < cardsStatuses.length; i++) {
+      const cardObject = cardsStatuses[i];
+      if(queue.includes(cardObject.card)) queue.splice(i, 1)
+      if(cardObject.live){
+
+        var fileContent = await fs.readFile("./lives.json")
+        var liveCards = JSON.parse(fileContent);
+        liveCards.push(cardObject);
+        await fs.writeFile("./lives.json", JSON.stringify(liveCards))
+      }
+    } */
+
+    for (let i = cardsStatuses.length-1; i >=0; i--) {
+      //console.log(i+1)
+        const cardObject = cardsStatuses[i];
+        if(queue.indexOf(cardObject.card)>=0) {
+            //console.log(cardObject)
+            queue.splice(queue.indexOf(cardObject.card), 1)
+        }
+        if(cardObject.live){
+          var fileContent = await readFile(resolve("./lives.json"))
+          var liveCards = JSON.parse(fileContent);
+          if(!liveCards.find(e=>e.card===cardObject.card))
+          {liveCards.push(cardObject);
+          await writeFile(resolve("./lives.json"), JSON.stringify(liveCards))}
+        }
+    }
+    
+    
+    var cupos = maxCurrent-queue.length;
+
+    while (cupos>0) {
+      console.log("cupos: ",cupos)
+      var card = generateCardFromString(bins[0]);
+      console.log(card)
+      queue.push(card);
+      if(card)await sendCardToCheck(card);
+      cupos--;
+    }
+    var restante = Date.now()-startTime;
+    if(restante>=1000)interval()
+    else setTimeout(interval, restante)
+    
+    /*     await page.waitForNavigation('#editable-message-text');
     await page.waitForSelector('#editable-message-text');
     await new Promise(resolve => setTimeout(resolve, 10000));
-    page.focus('#editable-message-text');
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    page.type('#editable-message-text', "mi efrain");
-    page.click("#MiddleColumn > div.messages-layout > div.Transition > div > div.middle-column-footer > div.Composer.shown.mounted > button");
+    */
+  }
+
+
+
+  setTimeout(interval, 30_000);
+}
+/* 
+async function getCardsStatuses() {
+  return page.evaluate((regexCard)=>{
+    return Array.from(document.querySelectorAll(".text-content.clearfix.with-meta")).filter(e=>regexCard.test(e.innerText) && e.innerText.includes("Status ➜")).map(e=>{
+      return{
+          live: e.innerText.includes("Declined!") ?false:true,
+          card: e.innerText.match(regexCard)[0]
+      }
+    })
+  }, regexCard)
+} */
+  async function getCardsStatuses() {
+    return page.evaluate(()=>{
+      var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
+      return Array.from(document.querySelectorAll(".text-content.clearfix.with-meta")).filter(e=>regexCard.test(e.innerText) && e.innerText.includes("Status ➜")).map(e=>{
+        return{
+            live: e.innerText.includes("Declined!") ?false:true,
+            card: e.innerText.match(regexCard)[0]
+        }
+      })
+    })
+  }
+async function sendCardToCheck(card){
+    await page.focus('#editable-message-text');   
+    await page.type('#editable-message-text', `${gate} ${card}`);
+    await page.click("#MiddleColumn > div.messages-layout > div.Transition > div > div.middle-column-footer > div.Composer.shown.mounted > button"); 
 }
 
-
-
-
+function getCheckingCards() {
+  return page.evaluate(
+    (regexCard)=>{return Array.from(document.querySelectorAll(".text-content.clearfix.with-meta"))
+      .filter(e=>e.innerText.includes("[Status] Loading ..."))
+      .map(e=>e.innerText.match(regexCard)[0])},
+   regexCard)
+}
 
   // Escuchar eventos de solicitud de HTTP
 
@@ -148,3 +260,5 @@ function uploadLocalStorageFile(localStorageJsonContent) {
     "method": "POST"
   });  
 }
+
+
