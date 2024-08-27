@@ -105,7 +105,9 @@ async function manejarTarjetas() {
   }, chat_id)
   */
   var queue = [];
+  var ejecucion=1;
   async function interval() {
+    console.log("ejecucion: ", ejecucion++)
     var startTime = Date.now();
 
     await antibot();
@@ -130,18 +132,19 @@ async function manejarTarjetas() {
 
     for (let i = cardsStatuses.length - 1; i >= 0; i--) {
       //console.log(i+1)
-      const cardObject = cardsStatuses[i];
-      if (queue.indexOf(cardObject.card) >= 0) {
-        //console.log(cardObject)
-        queue.splice(queue.indexOf(cardObject.card), 1)
-      }
-      if (cardObject.live) {
+      
+      if (cardsStatuses[i].live) {
         var fileContent = await readFile(resolve("./lives.json"))
         var liveCards = JSON.parse(fileContent);
-        if (!liveCards.find(e => e.card === cardObject.card)) {
-          liveCards.push(cardObject);
+        if (!liveCards.find(e => e.card === cardsStatuses[i].card)) {
+          liveCards.push(cardsStatuses[i]);
           await writeFile(resolve("./lives.json"), JSON.stringify(liveCards))
         }
+      }
+      if (queue.includes(cardsStatuses[i].card)) {
+        console.log("se encontro y se borrará :", cardsStatuses[i].card, " con index "+queue.indexOf(cardsStatuses[i].card))
+        //console.log(cardsStatuses[i])
+        queue.splice(queue.indexOf(cardsStatuses[i].card), 1)
       }
     }
 
@@ -181,10 +184,10 @@ async function getCardsStatuses() {
 async function getCardsStatuses() {
   return page.evaluate(() => {
     var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
-    return Array.from(document.querySelectorAll(".text-content.clearfix.with-meta")).filter(e => regexCard.test(e.innerText) && e.innerText.includes("Status ➜")).map(e => {
+    return Array.from(document.querySelectorAll(".Message.message-list-item .text-content")).filter(e => regexCard.test(e.innerText) && e.innerText.includes("Status ➜")).map(ele => {
       return {
-        live: e.innerText.includes("Declined!") ? false : true,
-        card: e.innerText.match(regexCard)[0]
+        live: ele.innerText.includes("Declined!") ? false : true,
+        card: ele.innerText.match(regexCard)[0]
       }
     })
   })
