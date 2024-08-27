@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer';
 
 // Or import puppeteer from 'puppeteer-core';
 import express from "express";
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, exist } from 'node:fs/promises';
 import path from "path";
 import fetch from "node-fetch";
 import { generateCardFromString } from "./GenCard.js";
@@ -106,6 +106,8 @@ async function manejarTarjetas() {
   */
   var queue = [];
   var ejecucion=1;
+
+  if(fs.ex)
   async function interval() {
     console.log("ejecucion: ", ejecucion++)
     var startTime = Date.now();
