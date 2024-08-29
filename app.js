@@ -94,7 +94,7 @@ function antibot() {
     if (antibotBtnArrayLength) {
       for (let i = 0; i < antibotBtnArrayLength; i++) {
         await page.click("." + classForAntibotButton + "-" + i);
-        console.log("se dio click a: " + i);
+        //console.log("se dio click a: " + i);
         await new Promise(r => {setTimeout(() => {r(true)}, generateRandomNumber(1000,3000))})
          
       }
@@ -128,18 +128,18 @@ async function interval() {
     page.waitForSelector('#editable-message-text', { timeout: 60_000 })
     yaCargo=true;
   } */
-  console.log(ejecucion++);
+  //console.log(ejecucion++);
   const startTime = Date.now();
   const maxTime = 1000; // límite inferior para el tiempo transcurrido
 
   await antibot();
   /*     var checkingCards=await getCheckingCards();
-      console.log("checking cards: ",checkingCards) */
+      //console.log("checking cards: ",checkingCards) */
   /* if (yaCargo) { */
     var cardsStatuses = await getCardsStatuses();
 
-    console.log(cardsStatuses.map(e => e.card));
-    console.log(queue)
+    //console.log(cardsStatuses.map(e => e.card));
+    //console.log(queue)
     /* for (let i = 0; i < cardsStatuses.length; i++) {
       const cardObject = cardsStatuses[i];
       if(queue.includes(cardObject.card)) queue.splice(i, 1)
@@ -156,6 +156,7 @@ async function interval() {
       //console.log(i+1)
 
       if (cardsStatuses[i].live) {
+        console.log("se encontro live: ", JSON.stringify(cardsStatuses[i]))
         var fileContent = await readFile(resolve("./lives.json"))
         var liveCards = JSON.parse(fileContent);
         if (!liveCards.find(e => e.card === cardsStatuses[i].card)) {
@@ -170,17 +171,17 @@ async function interval() {
       }
     }
 
-    console.log(queue)
+    //console.log(queue)
     var cupos = maxCurrent - queue.length;
 
     while (cupos > 0) {
-      console.log("cupos: ", cupos)
+      //console.log("cupos: ", cupos)
       var cardString = generateCardFromString(bin);
       //console.log(cardString)
       var cmmd = `${gate} ${cardString}`;
       if (cardString) {await sendCardToCheck(cmmd)} else {throw new Error("comando invalido mmmmmmm")};
-      var msgsWithCmmds = await getMessageWithCardCommands();
-      console.log(msgsWithCmmds)
+      /* var msgsWithCmmds = await getMessageWithCardCommands();
+      //console.log(msgsWithCmmds) */
       if (!queue.includes(cardString)) queue.push(cardString);
       cupos--;
     }
@@ -242,7 +243,7 @@ async function getCardsStatuses() {
   const root = parse(htmlText);
 
   var allMessages= root.querySelectorAll(".messages-container div.text-content.clearfix.with-meta");
-  console.log(allMessages.map(e=>e.innerText))
+  //console.log(allMessages.map(e=>e.innerText))
   var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
   var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && e.innerText.includes("Status ➜")).map(ele => {
     return {
@@ -262,7 +263,7 @@ async function getCardsStatuses() {
       }
     })
   }); */
-  console.log(matches)
+  //console.log(matches)
   /* return matches.filter(e => regexCard.test(e.innerText) && e.innerText.includes("Status ➜")).map(ele => {
     return {
       live: ele.innerText.includes("Declined!") ? false : true,
@@ -292,15 +293,15 @@ async function sendCardToCheck(cmmd) {
 // Escuchar eventos de respuesta de HTTP
 page.on('requestfinished', (request) => {
   if (request.url().startsWith('https://web.telegram.org/a/blank') && logged == false) {
-    console.log(request.url())
+    //console.log(request.url())
     if (
       localStorageJSON === ""
     ) { updateQr() }
 
   }
   if (request.url().startsWith('https://web.telegram.org/a/BundleMain.') && request.url().endsWith('.css')) {
-    console.log(request.url())
-    console.log('Sesión iniciada')
+    //console.log(request.url())
+    //console.log('Sesión iniciada')
     if (localStorageJSON === "") {
       page.waitForSelector("#LeftColumn-main > div.NewChatButton > button")
         .then(() => {
@@ -309,7 +310,7 @@ page.on('requestfinished', (request) => {
           })
             .then((localStorageJSON) => {
               /* fs.writeFileSync('localStorage.json', localStorageJSON);
-              console.log("localStorage.json was saved") */
+              //console.log("localStorage.json was saved") */
 
               uploadLocalStorageFile(localStorageJSON)
                 .then(() => console.log("localStorage file uploaded"))
@@ -339,7 +340,7 @@ app.get('/qr', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  //console.log(`Example app listening on port ${port}`)
 })
 
 
@@ -348,7 +349,7 @@ async function updateQr() {
   var qrSelector = await page.waitForSelector(".qr-container");
   qrSelector.screenshot().then(buffer => {
     fs.writeFileSync('qr.png', buffer);
-    console.log("QR code screenshot saved to qr.png");
+    //console.log("QR code screenshot saved to qr.png");
     qrSaved = true;
   })
     .catch(error => console.log(error))
