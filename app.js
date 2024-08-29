@@ -2,6 +2,7 @@ import express from "express";
 import { readFile, writeFile } from 'node:fs/promises';
 import path from "path";
 import fetch from "node-fetch";
+import { parse } from 'node-html-parser';
 import { generateCardFromString } from "./GenCard.js";
 import { resolve } from 'node:path';
 import puppeteer from 'puppeteer';
@@ -89,14 +90,18 @@ function antibot() {
       }
     }, classForAntibotButton);
 
+    await new Promise((r) =>{setTimeout(() =>r("ok"), 10_000)});
     if (antibotBtnArrayLength) {
       for (let i = 0; i < antibotBtnArrayLength; i++) {
         await page.click("." + classForAntibotButton + "-" + i);
         console.log("se dio click a: " + i);
+        await new Promise(r => {setTimeout(() => {r(true)}, generateRandomNumber(1000,3000))})
+         
       }
       var page1 = await browser.newPage();
       await page.close();
       page = page1;
+      await new Promise(r => {setTimeout(() => {r(true)}, generateRandomNumber(5000,10000))})
       await page.goto('https://web.telegram.org/a/' + chat_id);
     }
 
@@ -229,15 +234,24 @@ async function getCardsStatuses() {
     return matches
   }
 async function getCardsStatuses() {
-  return page.evaluate(() => {
-    var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
-    return Array.from(document.querySelector(".messages-container").querySelectorAll("div.text-content.clearfix.with-meta")).filter(e => regexCard.test(e.innerText) && e.innerText.includes("Status ➜")).map(ele => {
-      return {
-        live: ele.innerText.includes("Declined!") ? false : true,
-        card: ele.innerText.match(regexCard)[0]
-      }
-    })
+  var htmlText = await page.evaluate(() => {
+    /* */
+      return document.querySelector("html").outerHTML
   })
+
+  const root = parse(htmlText);
+
+  var allMessages= root.querySelectorAll(".messages-container div.text-content.clearfix.with-meta");
+  console.log(allMessages.map(e=>e.innerText))
+  var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
+  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && e.innerText.includes("Status ➜")).map(ele => {
+    return {
+      live: ele.innerText.includes("Approved") ? true : false,
+      card: ele.innerText.match(regexCard)[0],
+      date:generateDate()
+    }
+  })
+
  
  /*  var matches = await page.$$eval('div.text-content.clearfix.with-meta', (messages) => {
     var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
@@ -265,13 +279,9 @@ async function sendCardToCheck(cmmd) {
   return "r"; */
   await page.type('#editable-message-text',cmmd ,{delay:3})
 
-    await new Promise(r => {setTimeout(() => {
-      r(true)
-    }, generateRandomNumber(456,1000))})
+    await new Promise(r => {setTimeout(() => {r(true)}, generateRandomNumber(456,1000))})
     await page.click("#MiddleColumn > div.messages-layout > div.Transition > div > div.middle-column-footer > div.Composer.shown.mounted > button");
-    await new Promise(r => {setTimeout(() => {
-      r(true)
-    }, generateRandomNumber(456,1000))})
+    await new Promise(r => {setTimeout(() => {r(true)}, generateRandomNumber(456,1000))})
     return "ok";
   
  
@@ -351,4 +361,9 @@ async function updateQr() {
 
 function generateRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateDate() {
+  var dateOb = new Date();
+  return dateOb.toLocaleTimeString('es-CO', { hour12: true })+" - "+dateOb.toLocaleDateString("es-CO");
 }
