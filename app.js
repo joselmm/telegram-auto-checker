@@ -156,7 +156,7 @@ async function interval() {
     for (let i = cardsStatuses.length - 1; i >= 0; i--) {
       //console.log(i+1)
 
-      if (cardsStatuses[i].live /*  && queue.includes(cardsStatuses[i].card) */) {
+      if (cardsStatuses[i].live  && queue.includes(cardsStatuses[i].card)) {
         console.log("se encontro live: ", JSON.stringify(cardsStatuses[i]))
         /* var fileContent = await readFile(resolve("./lives.json"))
         var liveCards = JSON.parse(fileContent);
