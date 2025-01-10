@@ -14,11 +14,12 @@ var binFileBuffer = await readFile(resolve("./env.txt"));
 var binFileContent = binFileBuffer.toString();;
 var countedLive = 0;
 //return console.log(JSON.stringify(binFileContent))
-var [bin, gate, group_id, person_chat_id, bot_token,num_to_find ] = binFileContent.split("\r\n").map(e => e.split("=")[1])
+var [bin, gate, group_id, person_chat_id, bot_token,num_to_find, to_wait_card_send, wait_to_begin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
 /* 
 const bin = "43561902140xxxxx|03|2029|rnd";
 var gate = ".ap"; */
 num_to_find=Number(num_to_find);
+to_wait_card_send=Number(to_wait_card_send)*1000;
 
 //console.log(person_chat_id)
 
@@ -201,12 +202,12 @@ async function interval() {
           await sendCardToCheck(cmmd)
         ultimaVezEnviadaUnaTarjeta = Date.now();
 
-        }else if(tiempoDesdeUltimaTarjetaEnviada>=30_000) {
+        }else if(tiempoDesdeUltimaTarjetaEnviada>=to_wait_card_send) {
           await sendCardToCheck(cmmd)
           ultimaVezEnviadaUnaTarjeta = Date.now();
 
-        }else if(tiempoDesdeUltimaTarjetaEnviada<30_000){
-          await new Promise((resolve)=>setTimeout(resolve, (30_000-tiempoDesdeUltimaTarjetaEnviada)));
+        }else if(tiempoDesdeUltimaTarjetaEnviada<to_wait_card_send){
+          await new Promise((resolve)=>setTimeout(resolve, (to_wait_card_send-tiempoDesdeUltimaTarjetaEnviada)));
           await sendCardToCheck(cmmd)
           ultimaVezEnviadaUnaTarjeta = Date.now();
 
@@ -234,7 +235,7 @@ async function interval() {
 
 
 
-setTimeout(interval, 30_000);
+setTimeout(interval, Number(wait_to_begin)*1000);
 
 /* 
 async function getCardsStatuses() {
