@@ -12,12 +12,13 @@ import puppeteer from 'puppeteer';
 // Or import puppeteer from 'puppeteer-core';  
 var binFileBuffer = await readFile(resolve("./env.txt"));
 var binFileContent = binFileBuffer.toString();;
-
+var countedLive = 0;
 //return console.log(JSON.stringify(binFileContent))
-var [bin, gate, group_id, person_chat_id, bot_token ] = binFileContent.split("\r\n").map(e => e.split("=")[1])
+var [bin, gate, group_id, person_chat_id, bot_token,num_to_find ] = binFileContent.split("\r\n").map(e => e.split("=")[1])
 /* 
 const bin = "43561902140xxxxx|03|2029|rnd";
 var gate = ".ap"; */
+num_to_find=Number(num_to_find);
 
 //console.log(person_chat_id)
 
@@ -72,7 +73,7 @@ await page.click("body")
 page.on('dialog', async (dialog) => {
   await dialog.accept();
 });
-
+var ultimaVezEnviadaUnaTarjeta = null;
 // Set screen size.
 
 function antibot() {
@@ -157,6 +158,8 @@ async function interval() {
       //console.log(i+1)
 
       if (cardsStatuses[i].live  && queue.includes(cardsStatuses[i].card)) {
+        
+        
         console.log("se encontro live: ", JSON.stringify(cardsStatuses[i]))
         /* var fileContent = await readFile(resolve("./lives.json"))
         var liveCards = JSON.parse(fileContent);
@@ -165,6 +168,17 @@ async function interval() {
           await writeFile(resolve("./lives.json"), JSON.stringify(liveCards))
         } */
         await notificartelegramTarjetaLive(cardsStatuses[i])
+
+        //DETENER CUANDO SE ALCANCE EL LIMITE
+        countedLive=countedLive+1;
+        if(num_to_find===countedLive) {
+          try {
+            console.log("SE ALCANZO EL NUMERO DE LIVE ESPECIFICADAS EN ENV.TXT")
+            if (num_to_find === countedLive) await browser.close();
+          } catch (error) {
+            console.error("Error al cerrar el navegador:", error);
+          }
+        }
       }
       if (queue.includes(cardsStatuses[i].card)) {
         console.log("se encontro y se borrará :", cardsStatuses[i].card, " con index " + queue.indexOf(cardsStatuses[i].card))
@@ -181,7 +195,24 @@ async function interval() {
       var cardString = generateCardFromString(bin);
       //console.log(cardString)
       var cmmd = `${gate} ${cardString}`;
-      if (cardString) {await sendCardToCheck(cmmd)} else {throw new Error("comando invalido mmmmmmm")};
+      if (cardString) {
+        var tiempoDesdeUltimaTarjetaEnviada = Date.now() - ultimaVezEnviadaUnaTarjeta;
+        if(ultimaVezEnviadaUnaTarjeta===null ){
+          await sendCardToCheck(cmmd)
+        ultimaVezEnviadaUnaTarjeta = Date.now();
+
+        }else if(tiempoDesdeUltimaTarjetaEnviada>=30_000) {
+          await sendCardToCheck(cmmd)
+          ultimaVezEnviadaUnaTarjeta = Date.now();
+
+        }else if(tiempoDesdeUltimaTarjetaEnviada<30_000){
+          await new Promise((resolve)=>setTimeout(resolve, (30_000-tiempoDesdeUltimaTarjetaEnviada)));
+          await sendCardToCheck(cmmd)
+          ultimaVezEnviadaUnaTarjeta = Date.now();
+
+        }
+        
+      } else {throw new Error("comando invalido mmmmmmm")};
       /* var msgsWithCmmds = await getMessageWithCardCommands();
       //console.log(msgsWithCmmds) */
       if (!queue.includes(cardString)) queue.push(cardString);
@@ -247,9 +278,10 @@ async function getCardsStatuses() {
   var allMessages= root.querySelectorAll(".messages-container div.text-content.clearfix.with-meta");
   //console.log(allMessages.map(e=>e.innerText))
   var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
-  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && e.innerText.includes("Status:")).map(ele => {
+  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && e.innerText.includes("\n[あ] Status: ")).map(ele => {
+    //console.log(ele.innerText)
     return {
-      message:ele.innerText.match(/\nResponse: [^\n]+\n/)[0].replaceAll("\n","").split(": ")[1],
+      message: ele.innerText.match(/\[あ\] Status:\s*([^\n]+)/)[1],
       live: ele.innerText.includes("Approved") ? true : false,
       card: ele.innerText.match(regexCard)[0],
       date:generateDate()
