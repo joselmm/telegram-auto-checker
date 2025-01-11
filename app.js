@@ -287,7 +287,7 @@ async function getCardsStatuses() {
       card: ele.innerText.match(regexCard)[0],
       date:generateDate()
     }
-    console.log(s)
+   // console.log(s)
     return s;
   })
 
