@@ -259,7 +259,7 @@ async function getCardsStatuses() {
   return matches
 } */
 
-  async function getMessageWithCardCommands() {
+  /* async function getMessageWithCardCommands() {
     var matches = await page.$$eval('div.text-content.clearfix.with-meta', (messages, gate) => {
       var regexCard = /\d{16,}|(\d{1}|\d{2})|(\d{2}|\d{4})|(\d{3,4})/g;
       return messages.filter(e => regexCard.test(e.innerText) && e.innerText.includes(gate+" ")).map(ele => {
@@ -268,7 +268,7 @@ async function getCardsStatuses() {
       });
     }, gate);
     return matches
-  }
+  } */
 async function getCardsStatuses() {
   var htmlText = await page.evaluate(() => {
     /* */
@@ -283,7 +283,7 @@ async function getCardsStatuses() {
   var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && (e.innerText.includes("\n[あ] Response: ") || e.innerText.includes("[あ] Status: ERROR 1REQ ⚠️")).map(ele => {
     //console.log(ele.innerText)
     var preMessage = ""
-    if(e.innerText.includes("[あ] Status: ERROR 1REQ ⚠️")) preMessage="ERROR 1REQ ⚠️";
+    if(e.innerText.includes("[あ] Status: ERROR 1REQ ⚠️")) {preMessage="ERROR 1REQ ⚠️";}
    var cardState= {
       message: preMessage || ele.innerText.match(/\[あ\] Response: ([^\n]+)/)[0].split("[あ] Response: ")[1],
       live: ele.innerText.includes("Approved") ? true : false,
@@ -292,7 +292,7 @@ async function getCardsStatuses() {
     }
    // console.log(s)
     return cardState;
-  })
+  }))
 
  
  /*  var matches = await page.$$eval('div.text-content.clearfix.with-meta', (messages) => {
