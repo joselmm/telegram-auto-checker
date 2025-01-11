@@ -279,14 +279,16 @@ async function getCardsStatuses() {
   var allMessages= root.querySelectorAll(".messages-container div.text-content.clearfix.with-meta");
   //console.log(allMessages.map(e=>e.innerText))
   var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
-  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && e.innerText.includes("\n[あ] Status: ")).map(ele => {
+  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && e.innerText.includes("\n[あ] Response: ")).map(ele => {
     //console.log(ele.innerText)
-    return {
-      message: ele.innerText.match(/\[あ\] Status:\s*([^\n]+)/)[1],
+   var s= {
+      message: ele.innerText.match(/\[あ\] Response: ([^\n]+)/)[0].split("[あ] Response: ")[1],
       live: ele.innerText.includes("Approved") ? true : false,
       card: ele.innerText.match(regexCard)[0],
       date:generateDate()
     }
+    console.log(s)
+    return s;
   })
 
  
