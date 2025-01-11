@@ -276,14 +276,15 @@ async function getCardsStatuses() {
   })
 
   const root = parse(htmlText);
-
+  var checkingErrorMessage = "[あ] Status: ERROR 1REQ ";
   var allMessages= root.querySelectorAll(".messages-container div.text-content.clearfix.with-meta");
   //console.log(allMessages.map(e=>e.innerText))
   var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
-  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && (e.innerText.includes("\n[あ] Response: ") || e.innerText.includes("[あ] Status: ERROR 1REQ ⚠️")).map(ele => {
+  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && (e.innerText.includes("\n[あ] Response: ") || e.innerText.includes(checkingErrorMessage))).map(ele => {
     //console.log(ele.innerText)
     var preMessage = ""
-    if(e.innerText.includes("[あ] Status: ERROR 1REQ ⚠️")) {preMessage="ERROR 1REQ ⚠️";}
+
+    if(ele.innerText.includes(checkingErrorMessage)) {preMessage="ERROR 1REQ ⚠️";}
    var cardState= {
       message: preMessage || ele.innerText.match(/\[あ\] Response: ([^\n]+)/)[0].split("[あ] Response: ")[1],
       live: ele.innerText.includes("Approved") ? true : false,
@@ -292,7 +293,7 @@ async function getCardsStatuses() {
     }
    // console.log(s)
     return cardState;
-  }))
+  })
 
  
  /*  var matches = await page.$$eval('div.text-content.clearfix.with-meta', (messages) => {
