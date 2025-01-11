@@ -30,7 +30,7 @@ var qrSaved = false;
 var logged = false;
 var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
 
-var maxCurrent = 2;
+var maxCurrent = 1;
 
 
 // Launch the browser and open a new blank page
