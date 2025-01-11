@@ -26,6 +26,7 @@
     "express": "^4.19.2",
     "node-fetch": "^2.7.0",
     "node-html-parser": "^6.1.13",
+    "node-notifier": "^10.0.1",
     "puppeteer": "^23.1.1"
   }
 }

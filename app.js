@@ -6,6 +6,7 @@ import { parse } from 'node-html-parser';
 import { generateCardFromString } from "./GenCard.js";
 import { resolve } from 'node:path';
 import puppeteer from 'puppeteer';
+import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
 
 (async function(){
 
@@ -235,7 +236,7 @@ async function interval() {
 
 
 
-setTimeout(interval, Number(wait_to_begin)*1000);
+setTimeout(interval, (Number(wait_to_begin)*1000));
 
 /* 
 async function getCardsStatuses() {
@@ -430,7 +431,8 @@ async function notificartelegramTarjetaLive(liveCardObj) {
     var response = await fetch(apiEndpoint+bot_token+"/", options);
     var responseMessage = await response.json();
     if(responseMessage.ok){
-      console.log("Se envio la live "+liveCardObj.card+" a el telegram")
+      console.log("Se envio la live "+liveCardObj.card+" a el telegram");
+      notifyFoundLiveCard(liveCardObj.card);
     }else{
 
       throw new Error(responseMessage.description);
