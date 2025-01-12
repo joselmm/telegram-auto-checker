@@ -286,7 +286,7 @@ async function getCardsStatuses() {
 
     if(ele.innerText.includes(checkingErrorMessage)) {preMessage="ERROR 1REQ ⚠️";}
    var cardState= {
-      message: preMessage || ele.innerText.match(/\[あ\] Response: ([^\n]+)/)[0].split("[あ] Response: ")[1],
+      message: preMessage || ele.innerText.match(/\[あ\] Response: ([^\n]*)/)[0].split("[あ] Response: ")[1],
       live: ele.innerText.includes("Approved") ? true : false,
       card: ele.innerText.match(regexCard)[0],
       date:generateDate()
