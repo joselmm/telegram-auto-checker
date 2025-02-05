@@ -16,6 +16,7 @@ var binFileContent = binFileBuffer.toString();;
 var countedLive = 0;
 //return console.log(JSON.stringify(binFileContent))
 var [bin, gate, group_id, person_chat_id, bot_token,num_to_find, to_wait_card_send, wait_to_begin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
+console.log(bin)
 /* 
 const bin = "43561902140xxxxx|03|2029|rnd";
 var gate = ".ap"; */
