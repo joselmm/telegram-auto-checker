@@ -222,6 +222,8 @@ async function interval() {
             console.log("Timer antispam detectado, esperando "+toWaitBeforeSendingCard+" s")
             await new Promise((resolve) => setTimeout(()=>resolve(),toWaitBeforeSendingCard))
             await sendCardToCheck(cmmd)
+            ultimaVezEnviadaUnaTarjeta = Date.now();
+
           }
           
 
@@ -236,6 +238,8 @@ async function interval() {
             console.log("Timer antispam detectado, esperando "+toWaitBeforeSendingCard+" s")
             await new Promise((resolve) => setTimeout(()=>resolve(),toWaitBeforeSendingCard))
             await sendCardToCheck(cmmd)
+            ultimaVezEnviadaUnaTarjeta = Date.now();
+
           }
         }
         
