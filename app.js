@@ -200,18 +200,43 @@ async function interval() {
       if (cardString) {
         var tiempoDesdeUltimaTarjetaEnviada = Date.now() - ultimaVezEnviadaUnaTarjeta;
         if(ultimaVezEnviadaUnaTarjeta===null ){
-          await sendCardToCheck(cmmd)
-        ultimaVezEnviadaUnaTarjeta = Date.now();
+          var toWaitBeforeSendingCard = await checkIfAntispamTimer();
+          if(toWaitBeforeSendingCard>0){
+            console.log("Timer antispam detectado, esperando "+toWaitBeforeSendingCard+" s")
+            await new Promise((resolve) => setTimeout(()=>resolve(),toWaitBeforeSendingCard))
+          }
 
-        }else if(tiempoDesdeUltimaTarjetaEnviada>=to_wait_card_send) {
           await sendCardToCheck(cmmd)
           ultimaVezEnviadaUnaTarjeta = Date.now();
+
+        }else if(tiempoDesdeUltimaTarjetaEnviada>=to_wait_card_send) {
+          
+
+          await sendCardToCheck(cmmd)
+          ultimaVezEnviadaUnaTarjeta = Date.now();
+
+          await new Promise((resolve) => setTimeout(()=>resolve(),2000))
+
+          var toWaitBeforeSendingCard = await checkIfAntispamTimer();
+          if(toWaitBeforeSendingCard>0){
+            console.log("Timer antispam detectado, esperando "+toWaitBeforeSendingCard+" s")
+            await new Promise((resolve) => setTimeout(()=>resolve(),toWaitBeforeSendingCard))
+            await sendCardToCheck(cmmd)
+          }
+          
 
         }else if(tiempoDesdeUltimaTarjetaEnviada<to_wait_card_send){
           await new Promise((resolve)=>setTimeout(resolve, (to_wait_card_send-tiempoDesdeUltimaTarjetaEnviada)));
           await sendCardToCheck(cmmd)
           ultimaVezEnviadaUnaTarjeta = Date.now();
+          await new Promise((resolve) => setTimeout(()=>resolve(),2000))
 
+          var toWaitBeforeSendingCard = await checkIfAntispamTimer();
+          if(toWaitBeforeSendingCard>0){
+            console.log("Timer antispam detectado, esperando "+toWaitBeforeSendingCard+" s")
+            await new Promise((resolve) => setTimeout(()=>resolve(),toWaitBeforeSendingCard))
+            await sendCardToCheck(cmmd)
+          }
         }
         
       } else {throw new Error("comando invalido mmmmmmm")};
@@ -269,6 +294,29 @@ async function getCardsStatuses() {
     }, gate);
     return matches
   } */
+
+async function checkIfAntispamTimer() {
+  var toWait = await page.evaluate(() => {
+    /* */
+    var messages = Array.from(document.querySelectorAll(".messages-container div.text-content.clearfix.with-meta"));
+    var lastMessageContent = messages[messages.length-1].innerText;
+    var thematch = lastMessageContent.match(/\d+'s/)
+    if(lastMessageContent.includes("ANTISPAM Timer, Try Again After") && thematch !== null){
+      return ((Number(thematch[0].slice(0,-2))+ 0.5)*1000)
+    }
+    return 0
+
+  })
+  /* 
+  const root = parse(htmlText);
+
+  var allMessages= root.querySelectorAll(".messages-container div.text-content.clearfix.with-meta");
+   */
+  return toWait
+
+}
+
+
 async function getCardsStatuses() {
   var htmlText = await page.evaluate(() => {
     /* */
@@ -276,15 +324,16 @@ async function getCardsStatuses() {
   })
 
   const root = parse(htmlText);
-  var checkingErrorMessage = "[あ] Status: ERROR 1REQ ";
+
   var allMessages= root.querySelectorAll(".messages-container div.text-content.clearfix.with-meta");
   //console.log(allMessages.map(e=>e.innerText))
   var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
+  var checkingErrorMessage="[あ] Status: ERROR ";
   var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && (e.innerText.includes("\n[あ] Response: ") || e.innerText.includes(checkingErrorMessage))).map(ele => {
     //console.log(ele.innerText)
     var preMessage = ""
-
-    if(ele.innerText.includes(checkingErrorMessage)) {preMessage="ERROR 1REQ ⚠️";}
+    //ERROR INTERNO DEL CHECKER
+    if(ele.innerText.includes(checkingErrorMessage) && ele.innerText.includes("REQ \n")) {preMessage="ERROR 1REQ ⚠️";}
    var cardState= {
       message: preMessage || ele.innerText.match(/\[あ\] Response: ([^\n]*)/)[0].split("[あ] Response: ")[1],
       live: ele.innerText.includes("Approved") ? true : false,
