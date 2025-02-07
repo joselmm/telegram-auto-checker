@@ -15,12 +15,24 @@ var binFileBuffer = await readFile(resolve("./env.txt"));
 var binFileContent = binFileBuffer.toString();;
 var countedLive = 0;
 //return console.log(JSON.stringify(binFileContent))
-var [bin, gate, group_id, person_chat_id, bot_token,num_to_find, to_wait_card_send, wait_to_begin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
-console.log(bin)
+var [binsString, gate, group_id, person_chat_id, bot_token,num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
+//console.log(bin)
+var temporalBinIndex = 0;
+var numOfAttempts = 0;
+var binList = [];
+var newBin = false;
+if(binsString.includes(",")) {
+  binList = binsString.split(",");
+}else{
+  binList=[binsString]
+}
+//var temporalBin = binList[0];
+
 /* 
 const bin = "43561902140xxxxx|03|2029|rnd";
 var gate = ".ap"; */
 num_to_find=Number(num_to_find);
+max_atemps_per_bin = Number(max_atemps_per_bin);
 to_wait_card_send=Number(to_wait_card_send)*1000;
 
 //console.log(person_chat_id)
@@ -128,6 +140,13 @@ var queue = [];
 var ejecucion = 1;
 var yaCargo = false;
 async function interval() {
+  if(newBin) {
+    countedLive = 0;
+    numOfAttempts=0;
+    temporalBinIndex=temporalBinIndex+1;
+    newBin = false;
+    console.log("Cambiando a nuevo bin: "+binList[temporalBinIndex])
+  }
 
   /* if (!yaCargo) {
     page.waitForSelector('#editable-message-text', { timeout: 60_000 })
@@ -177,14 +196,24 @@ async function interval() {
         if(num_to_find===countedLive) {
           try {
             console.log("SE ALCANZO EL NUMERO DE LIVE ESPECIFICADAS EN ENV.TXT")
-            if (num_to_find === countedLive) await browser.close();
+            if (num_to_find === countedLive ){
+
+              if(temporalBinIndex === binList.length-1){
+                await browser.close();
+              }{
+                newBin=true;
+                
+              }
+
+              
+            } 
           } catch (error) {
             console.error("Error al cerrar el navegador:", error);
           }
         }
       }
       if (queue.includes(cardsStatuses[i].card)) {
-        console.log("se encontro y se borrará :", cardsStatuses[i].card, " con index " + queue.indexOf(cardsStatuses[i].card))
+        console.log("Intento: "+numOfAttempts+", Borrando:", cardsStatuses[i].card, ",index " + queue.indexOf(cardsStatuses[i].card))
         //console.log(cardsStatuses[i])
         queue.splice(queue.indexOf(cardsStatuses[i].card), 1)
       }
@@ -195,7 +224,7 @@ async function interval() {
 
     while (cupos > 0) {
       //console.log("cupos: ", cupos)
-      var cardString = generateCardFromString(bin);
+      var cardString = generateCardFromString(binList[temporalBinIndex]);
       //console.log(cardString)
       var cmmd = `${gate} ${cardString}`;
       if (cardString) {
@@ -243,7 +272,10 @@ async function interval() {
 
           }
         }
-        
+        numOfAttempts = numOfAttempts+1;
+        if(numOfAttempts===max_atemps_per_bin){
+          newBin=true;
+        }
       } else {throw new Error("comando invalido mmmmmmm")};
       /* var msgsWithCmmds = await getMessageWithCardCommands();
       //console.log(msgsWithCmmds) */
@@ -458,7 +490,7 @@ async function notificartelegramTarjetaLive(liveCardObj) {
   message+="*Card:* `"+liveCardObj.card+"`\n";
   message+="*Message:* `"+liveCardObj.message+"`\n";
   message+="*Date:* `"+liveCardObj.date+"`\n";
-  message+="*Bin:* `"+bin+"`\n";
+  message+="*Bin:* `"+binList[temporalBinIndex]+"`\n";
   message+="*Gate:* `"+gate+"`";
   var apiEndpoint = "https://api.telegram.org/bot";
   
