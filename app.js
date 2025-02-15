@@ -1,4 +1,6 @@
 import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
 import { readFile, writeFile } from 'node:fs/promises';
 import path from "path";
 import fetch from "node-fetch";
@@ -38,7 +40,7 @@ to_wait_card_send=Number(to_wait_card_send)*1000;
 //console.log(person_chat_id)
 
 const app = express()
-const port = 3000;
+const port = process.env.PORT || 3000 ;
 var qrSaved = false;
 var logged = false;
 var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
@@ -48,8 +50,20 @@ var maxCurrent = 1;
 
 // Launch the browser and open a new blank page
 const browser = await puppeteer.launch({
-  headless: false, defaultViewport: null,
-  args: ['--start-maximized']
+  args: [
+      '--start-maximized',
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+     /*  "--single-process", */
+      "--no-zygote",
+      
+    ],
+  executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
+  headless: false, 
+  defaultViewport: null
 });
 const defaultBrowserContext = browser.defaultBrowserContext();
 const pages = await defaultBrowserContext.pages();
@@ -157,6 +171,8 @@ async function interval() {
   const maxTime = 1000; // límite inferior para el tiempo transcurrido
 
   await antibot();
+
+  
   /*     var checkingCards=await getCheckingCards();
       //console.log("checking cards: ",checkingCards) */
   /* if (yaCargo) { */
@@ -298,7 +314,25 @@ async function interval() {
 
 
 
-setTimeout(interval, (Number(wait_to_begin)*1000));
+setTimeout(async ()=>{
+  /* var buttonpage = await page.evaluate(()=>{
+    if(document.querySelector("#portals > div:nth-child(2) > div > div > div.modal-dialog > div.modal-content.custom-scroll > div > button")){
+      return true;
+    }
+
+    return false
+  })
+
+  if(buttonpage){
+    var button = await page.waitForSelector("#portals > div:nth-child(2) > div > div > div.modal-dialog > div.modal-content.custom-scroll > div > button");
+    await button.click();
+  }
+  await new Promise((resolve)=>{
+    setTimeout(resolve, 10_000)
+  }) */
+
+  interval();
+}, (Number(wait_to_begin)*1000));
 
 /* 
 async function getCardsStatuses() {
@@ -355,6 +389,9 @@ async function checkIfAntispamTimer() {
 
 
 async function getCardsStatuses() {
+
+    
+  
   var htmlText = await page.evaluate(() => {
     /* */
       return document.querySelector("html").outerHTML
@@ -365,13 +402,16 @@ async function getCardsStatuses() {
   var allMessages= root.querySelectorAll(".messages-container div.text-content.clearfix.with-meta");
   //console.log(allMessages.map(e=>e.innerText))
   var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
-  var checkingErrorMessage="[あ] Status: ERROR ";
-  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && (e.innerText.includes("\n[あ] Response: ") || e.innerText.includes(checkingErrorMessage))).map(ele => {
+  
+  var matches= allMessages.filter(e => e.innerText.match(regexCard)!==null && e.innerText.includes("[あ] Card:")).filter(e=>e.innerText.includes("[あ] Response: ") || e.querySelector("img[alt=⚠️]")).map(ele => {
     //console.log(ele.innerText)
     var preMessage = ""
     //ERROR INTERNO DEL CHECKER
-    if(ele.innerText.includes(checkingErrorMessage) && ele.innerText.includes("REQ \n")) {preMessage="ERROR 1REQ ⚠️";}
-   var cardState= {
+    if(ele.querySelector("img[alt=⚠️]")) {
+      //console.log("este tiene error")
+      preMessage="ERROR ⚠️";
+    }
+    var cardState= {
       message: preMessage || ele.innerText.match(/\[あ\] Response: ([^\n]*)/)[0].split("[あ] Response: ")[1],
       live: ele.innerText.includes("Approved") ? true : false,
       card: ele.innerText.match(regexCard)[0],
@@ -379,6 +419,8 @@ async function getCardsStatuses() {
     }
    // console.log(s)
     return cardState;
+
+    
   })
 
  
@@ -399,6 +441,8 @@ async function getCardsStatuses() {
     }
   }) */
   return matches
+
+
 }
 async function sendCardToCheck(cmmd) {
  // await page.focus('#editable-message-text');
