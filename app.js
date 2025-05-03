@@ -19,8 +19,12 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
   //return console.log(JSON.stringify(binFileContent))
   var [binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
   //console.log(bin)
-  var splitter = process.argv[2].match(/ +/g)[0];
-  [gate, binsString] = process.argv[2].split(splitter);
+
+  if(process.argv[2]){
+
+    var splitter = process.argv[2].match(/ +/g)[0];
+    [gate, binsString] = process.argv[2].split(splitter);
+  }
 
   var temporalBinIndex = 0;
   var numOfAttempts = 0;
