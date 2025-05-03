@@ -70,7 +70,7 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
       process.env.NODE_ENV === "production"
         ? process.env.PUPPETEER_EXECUTABLE_PATH
         : "", */
-    channel: "chrome",
+    channel: "msedge",
     headless: false,
 
 
@@ -87,8 +87,8 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
   /*   const pages = await browser.pages(); */
   let page = await context.newPage(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
 
-  page.goto('https://web.telegram.org/a/' + group_id);
-  await page.waitForSelector("#root");
+  await page.goto('https://web.telegram.org/a/', {timeout: 180_000});
+  await page.waitForSelector("#root",{timeout: 180_000});
 
   var localStorageBuffer = await readFile(resolve("./localStorage.json"))
   var localStorageJSON = localStorageBuffer.toString();
@@ -112,7 +112,7 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
   /* await page.goto('https://web.telegram.org/a/' + group_id); */
   page.evaluate(() => window.location.reload());
 
-  page.goto('https://web.telegram.org/a/' + group_id);
+  await page.goto('https://web.telegram.org/a/' + group_id,{timeout:180_000});
 
 
   await new Promise(r => {
