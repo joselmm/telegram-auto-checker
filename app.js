@@ -397,7 +397,7 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
       //console.log(allMessages.map(e=>e.innerText))
       var regexCard = /\d{16,}\|(\d{1}|\d{2})\|(\d{2}|\d{4})\|(\d{3,4})/g;
 
-      var matches = allMessages.filter(e => e.innerText.match(regexCard) !== null && e.innerText.includes("「✪」 𝑪𝑪 ➵")).filter(e => e.innerText.includes("「✪」 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ") && e.innerText.includes("「✪」 𝑺𝒕𝒂𝒕𝒖𝒔 ➵ ")).map(ele => {
+      var matches = allMessages.filter(e => e.innerText.match(regexCard) !== null && e.innerText.includes("[𒈒] 𝑪𝑪 ➵ ")).filter(e => e.innerText.includes(" 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ") && e.innerText.includes("[𒈒] 𝑺𝒕𝒂𝒕𝒖𝒔 ➵ ")).map(ele => {
         //console.log(ele.innerText)
         /* var preMessage = ""
         //ERROR INTERNO DEL CHECKER
@@ -406,7 +406,7 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
           preMessage="ERROR ⚠️";
         } */
         var cardState = {
-          message: /* preMessage ||  */ele.innerText.match(/「✪」 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ([^\n]*)/)[0].split("「✪」 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ")[1],
+          message: /* preMessage ||  */ele.innerText.match(/ 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ([^\n]*)/)[0].split(" 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ")[1],
           live: ele.innerText.includes("Approved") ? true : false,
           card: ele.innerText.match(regexCard)[0],
           date: generateDate()
