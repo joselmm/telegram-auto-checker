@@ -416,7 +416,7 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
         } */
         var cardState = {
           message: /* preMessage ||  */ele.innerText.match(/ 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ([^\n]*)/)[0].split(" 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ")[1],
-          live: ele.innerText.includes("Approved") ? true : false,
+          live: ele.innerText.includes("[𒈒] 𝑺𝒕𝒂𝒕𝒖𝒔 ➵ Approved") ? true : false,
           card: ele.innerText.match(regexCard)[0],
           date: generateDate()
         }
