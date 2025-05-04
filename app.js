@@ -417,6 +417,8 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
         var cardState = {
           message: /* preMessage ||  */ele.innerText.match(/ 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ([^\n]*)/)[0].split(" 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒆 ➵ ")[1],
           live: ele.innerText.includes("[𒈒] 𝑺𝒕𝒂𝒕𝒖𝒔 ➵ Approved") ? true : false,
+          cardInfo:ele.innerText.includes("\[𒈒\] 𝑰𝒏𝒇𝒐 ➵ ") ? ele.innerText.match(/\[𒈒\] 𝑰𝒏𝒇𝒐 ➵ ([^\n]*)/)[0].split("[𒈒] 𝑰𝒏𝒇𝒐 ➵ ")[1] : "No Info",
+          bankName:ele.innerText.includes("\[𒈒\] 𝑩𝒂𝒏𝒌 ➵ ") ? ele.innerText.match(/\[𒈒\] 𝑩𝒂𝒏𝒌 ➵ ([^\n]*)/)[0].split("[𒈒] 𝑩𝒂𝒏𝒌 ➵ ")[1] : "No Info",
           card: ele.innerText.match(regexCard)[0],
           date: generateDate()
         }
@@ -521,6 +523,8 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
     var message = "";
     message += "Live Card ✅\n\n";
     message += "*Card:* `" + liveCardObj.card + "`\n";
+    message += "*Card Info:* `" + liveCardObj.cardInfo + "`\n";
+    message += "*Bank Name:* `" + liveCardObj.bankName + "`\n";
     message += "*Message:* `" + liveCardObj.message + "`\n";
     message += "*Date:* `" + liveCardObj.date + "`\n";
     message += "*Bin:* `" + binList[temporalBinIndex] + "`\n";
