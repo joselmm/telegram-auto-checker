@@ -110,9 +110,18 @@ import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
 
   // Navigate the page to a URL.
   /* await page.goto('https://web.telegram.org/a/' + group_id); */
-  page.evaluate(() => window.location.reload());
+  /* page.evaluate(() => window.location.reload()); */
+  await page.reload();
+  await page.waitForSelector("#LeftColumn-main > div.Transition > div > div > div > div > div > div",{timeout:180_000})
 
-  await page.goto('https://web.telegram.org/a/' + group_id,{timeout:180_000});
+  await page.waitForTimeout(13_000)
+  await page.evaluate(()=>{
+    Array.from(document.querySelectorAll("#LeftColumn-main > div.Transition > div > div > div > div > div > div")).find(e=>e.innerText.includes("𝙇𝙞𝙤𝙣𝙨 𝘾𝙝𝙚𝙘𝙠𝙚𝙧")).id="este-es-el-checker"
+    return true
+  })
+
+  await page.locator("#este-es-el-checker").click();
+  //await page.goto('https://web.telegram.org/a/' + group_id,{timeout:180_000});
 
 
   await new Promise(r => {
