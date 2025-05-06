@@ -92,8 +92,8 @@ import { getConfig } from "./modules/getConfig.js";
 
     /* const defaultBrowserContext = browser.defaultBrowserContext(); */
     /*   const pages = await browser.pages(); */
-    let pages = await browser.pages(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
-    let page = pages[0];
+    //let pages = await browser.pages(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
+    let page = await browser.newPage();
     await page.goto('https://web.telegram.org/a/', { timeout: 180_000 });
     await page.waitForSelector("#root", { timeout: 180_000 });
 
@@ -199,7 +199,7 @@ import { getConfig } from "./modules/getConfig.js";
         } */
         //console.log(ejecucion++);
         var startTime = Date.now();
-        const maxTime = 1000; // límite inferior para el tiempo transcurrido
+        const maxTime = 4000; // límite inferior para el tiempo transcurrido
 
         await antibot();
 
