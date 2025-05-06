@@ -209,7 +209,8 @@ import { getConfig } from "./modules/getConfig.js";
         /* if (yaCargo) { */
         var cardsStatuses = await getCardsStatuses();
 
-        for (let i = cardsStatuses.length - 1; i >= 0; i--) {
+
+        for (let i = cardsStatuses.length - 1; i >= 0 ; i--) {
             var queue = getQueue();
             if (queue.length < 1) break;
             //console.log(i+1)
@@ -377,7 +378,9 @@ import { getConfig } from "./modules/getConfig.js";
 
 
             })
-            return matches
+            //return matches
+            return matches.slice(-4);
+
 
         })
         // console.log(cardsStatuses)
