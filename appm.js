@@ -40,6 +40,7 @@ import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueA
     var max_atemps_per_bin = parts[8];
 
     if (process.argv[2]) {
+        console.log("se recibienron args")
         var splitter = process.argv[2].match(/ +/g)[0];
         [gate, binsString] = process.argv[2].split(splitter);
     }
