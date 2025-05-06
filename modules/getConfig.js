@@ -25,9 +25,9 @@ function getConfig() {
   }
 
   // opción: parsear bin en array
-  if (typeof cfg.bin === 'string') {
+ /*  if (typeof cfg.bin === 'string') {
     cfg.bin = cfg.bin.split(',').map(s => s.trim());
-  }
+  } */
 
   return cfg;
 }
