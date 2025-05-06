@@ -16,23 +16,23 @@ import { getConfig } from "./modules/getConfig.js";
 (async function () {
 
     // Or import puppeteer from 'puppeteer-core';  
-    
+
     var countedLive = 0;
     //return console.log(JSON.stringify(binFileContent))
     //var [binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
     // Carga todas las variables y las parsea
-var env = getConfig();
-
-// Ahora extraemos por nombre en lugar de por índice
-var binsString         = env.binsString;
-var gate               = env.gate;
-var group_id           = env.group_id;
-var person_chat_id     = env.person_chat_id;
-var bot_token          = env.bot_token;
-var num_to_find        = env.num_to_find;
-var to_wait_card_send  = env.to_wait_card_send;
-var wait_to_begin      = env.wait_to_begin;
-var max_atemps_per_bin = env.max_atemps_per_bin;
+    var env = getConfig();
+    console.log(env)
+    // Ahora extraemos por nombre en lugar de por índice
+    var binsString = env.binsString;
+    var gate = env.gate;
+    var group_id = env.group_id;
+    var person_chat_id = env.person_chat_id;
+    var bot_token = env.bot_token;
+    var num_to_find = env.num_to_find;
+    var to_wait_card_send = env.to_wait_card_send;
+    var wait_to_begin = env.wait_to_begin;
+    var max_atemps_per_bin = env.max_atemps_per_bin;
 
 
     if (process.argv[2]) {
