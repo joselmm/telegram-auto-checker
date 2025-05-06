@@ -18,7 +18,7 @@ function callApiSync(action, data = null) {
 
 
   var body = JSON.parse(res.getBody("utf8"));
- console.log(body)
+// console.log(body)
   // parseamos el JSON que devuelve el Apps Script
   return body ;
 }
