@@ -11,33 +11,29 @@ import { resolve } from 'node:path';
 import puppeteer from 'puppeteer-core';
 import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
 import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueActions.js"
+import { getConfig } from "./modules/getConfig.js";
 
 (async function () {
 
     // Or import puppeteer from 'puppeteer-core';  
-    var binFileBuffer = await readFile(resolve("./env.txt"));
-    var binFileContent = binFileBuffer.toString();;
+    
     var countedLive = 0;
     //return console.log(JSON.stringify(binFileContent))
     //var [binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
-    var lines = binFileContent.split("\r\n");
+    // Carga todas las variables y las parsea
+var env = getConfig();
 
-    // Obtener sólo lo que hay después del “=”
-    var parts = lines.map(function (line) {
-        var kv = line.split("=");
-        return kv[1];
-    });
+// Ahora extraemos por nombre en lugar de por índice
+var binsString         = env.binsString;
+var gate               = env.gate;
+var group_id           = env.group_id;
+var person_chat_id     = env.person_chat_id;
+var bot_token          = env.bot_token;
+var num_to_find        = env.num_to_find;
+var to_wait_card_send  = env.to_wait_card_send;
+var wait_to_begin      = env.wait_to_begin;
+var max_atemps_per_bin = env.max_atemps_per_bin;
 
-    // Asignar manualmente cada variable
-    var binsString = parts[0];
-    var gate = parts[1];
-    var group_id = parts[2];
-    var person_chat_id = parts[3];
-    var bot_token = parts[4];
-    var num_to_find = parts[5];
-    var to_wait_card_send = parts[6];
-    var wait_to_begin = parts[7];
-    var max_atemps_per_bin = parts[8];
 
     if (process.argv[2]) {
         console.log("se recibienron args")
