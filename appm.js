@@ -19,11 +19,27 @@ import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueA
     var binFileContent = binFileBuffer.toString();;
     var countedLive = 0;
     //return console.log(JSON.stringify(binFileContent))
-    var [binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
-    //console.log(bin)
+    //var [binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
+    var lines = binFileContent.split("\r\n");
+
+    // Obtener sólo lo que hay después del “=”
+    var parts = lines.map(function (line) {
+        var kv = line.split("=");
+        return kv[1];
+    });
+
+    // Asignar manualmente cada variable
+    var binsString = parts[0];
+    var gate = parts[1];
+    var group_id = parts[2];
+    var person_chat_id = parts[3];
+    var bot_token = parts[4];
+    var num_to_find = parts[5];
+    var to_wait_card_send = parts[6];
+    var wait_to_begin = parts[7];
+    var max_atemps_per_bin = parts[8];
 
     if (process.argv[2]) {
-
         var splitter = process.argv[2].match(/ +/g)[0];
         [gate, binsString] = process.argv[2].split(splitter);
     }
@@ -65,8 +81,8 @@ import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueA
             "--no-sandbox",
             "--no-zygote",
         ],
-        executablePath: os.platform() === "win32" ? "C:\\Users\\Usuario\\.cache\\puppeteer\\chrome\\win64-119.0.6045.105\\chrome-win64\\chrome.exe" : "/usr/bin/chrome",
-        headless: !(os.platform() === "win32"),
+        executablePath: os.platform() === "win32" ? "C:\\Users\\Usuario\\.cache\\puppeteer\\chrome\\win64-119.0.6045.105\\chrome-win64\\chrome.exe" : "/usr/bin/chromium",
+        headless: false //!(os.platform() === "win32"),
 
     });
 
@@ -198,16 +214,16 @@ import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueA
 
         for (let i = cardsStatuses.length - 1; i >= 0; i--) {
             var queue = getQueue();
-            if(queue.length<1)break;
+            if (queue.length < 1) break;
             //console.log(i+1)
-           
+
 
             var cardObj = cardsStatuses[i];
             var card = cardObj.card.toString().trim();
             var index = queue.indexOf(card);
 
 
-            if (cardObj.live && index>=0) {
+            if (cardObj.live && index >= 0) {
 
 
                 console.log("se encontro live: ", JSON.stringify(cardObj))
@@ -218,7 +234,7 @@ import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueA
                   await writeFile(resolve("./lives.json"), JSON.stringify(liveCards))
                 } */
                 await notificartelegramTarjetaLive(cardObj)
-                
+
                 //DETENER CUANDO SE ALCANCE EL LIMITE
                 countedLive = countedLive + 1;
                 if (num_to_find === countedLive) {
@@ -241,7 +257,7 @@ import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueA
                 }
             }
 
-            if (index>=0) {
+            if (index >= 0) {
                 numOfAttempts = numOfAttempts + 1;
                 console.log("Intento: " + numOfAttempts + ", Borrando:", cardObj.card, ",index " + queue.indexOf(cardObj.card))
                 deleteFromQueue(card)
@@ -262,14 +278,14 @@ import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueA
             //console.log(cardString)
             var cmmd = `${gate} ${cardString}`;
             if (cardString) {
-                
+
 
                 await sendCardToCheck(cmmd);
                 addCard(cardString);
                 cupos--;
             }
             /*  } */
-           
+
         }
 
         const endTime = Date.now();
@@ -373,10 +389,10 @@ import { resetQueue, getQueue, addCard, deleteFromQueue } from "./modules/queueA
 
     }
     async function sendCardToCheck(cmmd) {
-        return new Promise(async r=>{
+        return new Promise(async r => {
 
             await page.type('#editable-message-text', cmmd, { delay: 3 })
-            
+
             await new Promise(r => { setTimeout(() => { r(true) }, generateRandomNumber(456, 1000)) })
             await page.click("#MiddleColumn > div.messages-layout > div.Transition > div > div.middle-column-footer > div.Composer.shown.mounted > button");
             await new Promise(r => { setTimeout(() => { r(true) }, generateRandomNumber(456, 1000)) })
