@@ -24,7 +24,7 @@ import { getConfig } from "./modules/getConfig.js";
     var env = getConfig();
     console.log(env)
     // Ahora extraemos por nombre en lugar de por índice
-    var binsString = env.binsString;
+    var binsString = env.bin;
     var gate = env.gate;
     var group_id = env.group_id;
     var person_chat_id = env.person_chat_id;
