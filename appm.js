@@ -79,7 +79,7 @@ import { getConfig } from "./modules/getConfig.js";
             "--no-zygote",
         ],
         executablePath: os.platform() === "win32" ? "C:\\Users\\Usuario\\.cache\\puppeteer\\chrome\\win64-119.0.6045.105\\chrome-win64\\chrome.exe" : "/usr/bin/chromium",
-        headless: false //!(os.platform() === "win32"),
+        headless: !(os.platform() === "win32"),
 
     });
 
