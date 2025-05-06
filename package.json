@@ -28,6 +28,8 @@
     "node-fetch": "^2.7.0",
     "node-html-parser": "^6.1.13",
     "node-notifier": "^10.0.1",
-    "playwright-core": "^1.52.0"
+    "playwright-core": "^1.52.0",
+    "puppeteer-core": "^24.8.1",
+    "sync-request": "^6.1.0"
   }
 }
