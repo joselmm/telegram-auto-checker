@@ -2,3 +2,4 @@ node_modules
 localStorage.json
 env.txt
 lives.json
+queue.json
