@@ -1,42 +1,85 @@
 // appQueueClientSync.js
-import request from "sync-request";
+import { writeFileSync, readFileSync, existsSync } from "fs";
+import { resolve } from "path";
 
-
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr3VYUVFLNHYQLIu65nYlZucCZczHl6NH6-s0SWU8WBUPyZSJ4YTcgMATB66uDMc9Uhw/exec";
+const QUEUE_FILE = resolve("./queue.json");
 
 /**
- * Llama síncrono y parsea JSON.
+ * Ensure queue.json exists. If not, create with empty array.
  */
-function callApiSync(action, data = null) {
-  const res = request("POST", SCRIPT_URL, {
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action, data }),
-  });
-  if (res.statusCode < 200 || res.statusCode >= 300) {
-    throw new Error(`HTTP error ${res.statusCode}`);
+function ensureFile() {
+  if (!existsSync(QUEUE_FILE)) {
+    writeFileSync(QUEUE_FILE, JSON.stringify([], null, 2), "utf8");
   }
-
-
-  var body = JSON.parse(res.getBody("utf8"));
-// console.log(body)
-  // parseamos el JSON que devuelve el Apps Script
-  return body ;
 }
 
+/**
+ * Load and parse queue.json
+ * @returns {Array<any>}
+ */
+function callApiSync_loadQueue() {
+  ensureFile();
+  const raw = readFileSync(QUEUE_FILE, "utf8");
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Serialize and save queue.json
+ * @param {Array<any>} queue
+ */
+function callApiSync_saveQueue(queue) {
+  writeFileSync(QUEUE_FILE, JSON.stringify(queue, null, 2), "utf8");
+}
+
+// -----------------------------------------------------------------------------
+// same API as before:
+
+/**
+ * Reset to empty queue.
+ * @returns {Array<any>} the new (empty) queue
+ */
 function resetQueue() {
-  return callApiSync("reset");
+  callApiSync_saveQueue([]);
+  return [];
 }
 
+/**
+ * Get the current queue.
+ * @returns {Array<any>}
+ */
 function getQueue() {
-  return callApiSync("get");
+  return callApiSync_loadQueue();
 }
 
+/**
+ * Add a card to the queue.
+ * @param {any} card
+ * @returns {Array<any>} the updated queue
+ */
 function addCard(card) {
-  return callApiSync("add", card);
+  const queue = callApiSync_loadQueue();
+  queue.push(card);
+  callApiSync_saveQueue(queue);
+  return queue;
 }
 
+/**
+ * Remove the first occurrence of `card` from the queue.
+ * @param {any} card
+ * @returns {Array<any>} the updated queue
+ */
 function deleteFromQueue(card) {
-  return callApiSync("delete", card);
+  const queue = callApiSync_loadQueue();
+  const idx = queue.indexOf(card);
+  if (idx !== -1) {
+    queue.splice(idx, 1);
+    callApiSync_saveQueue(queue);
+  }
+  return queue;
 }
 
 export {
