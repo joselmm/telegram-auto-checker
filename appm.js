@@ -165,19 +165,20 @@ function antibot(timeoutMs = 2000) {
               milliseconds:1000* parseInt(txtNode.innerText.match(/\d+'/)[0], 10)
             };
           }
-          return { anti: false, milliseconds: 0 };
+          return { anti: false, milliseconds: 0,  };
         });
   
         if (antibotResponse.anti) {
+            var now = Date.now();
           // Resuelve y sale inmediatamente
-          return resolve(antibotResponse);
+          return resolve({...antibotResponse, spentTime:now-startTime});
         }
         // opcional: pequeña pausa para no saturar CPU
         await new Promise(r => setTimeout(r, 200));
       }
-  
+      var now = Date.now();
       // timeout expirado sin detectar anti‑bot
-      resolve({ anti: false, milliseconds: 0 });
+      resolve({ anti: false, milliseconds: 0, spentTime:now-startTime });
     });
   }
   
@@ -292,8 +293,8 @@ function antibot(timeoutMs = 2000) {
                 var timeoutAntibot=2000;
                 var resAntibot= await antibot(timeoutAntibot);
                 if (resAntibot.anti) {
-                    console.log("Antibot esperando "+(resAntibot.milliseconds-timeoutAntibot)+" ms");
-                    await waitForTimeout(resAntibot.milliseconds-timeoutAntibot);
+                    console.log("Antibot esperando "+(resAntibot.milliseconds-resAntibot.spentTime)+" ms");
+                    await waitForTimeout(resAntibot.milliseconds-resAntibot.spentTime);
                     await sendCardToCheck(cmmd);
                 };
                 addCard(cardString);
