@@ -74,9 +74,9 @@ import { getConfig } from "./modules/getConfig.js";
     // Launch the browser and open a new blank page
     const browser = await puppeteer.launch({
         args: [
-            "--disable-setuid-sandbox",
+
             "--no-sandbox",
-            "--no-zygote",
+
         ],
         executablePath: os.platform() === "win32" ? "C:\\Users\\Usuario\\.cache\\puppeteer\\chrome\\win64-119.0.6045.105\\chrome-win64\\chrome.exe" : "/usr/bin/chromium",
         headless: false //!(os.platform() === "win32"),
