@@ -135,42 +135,52 @@ import { getConfig } from "./modules/getConfig.js";
     var ultimaVezEnviadaUnaTarjeta = null;
     // Set screen size.
 
-    function antibot() {
-        return new Promise(async (resolve) => {
-
-            var classForAntibotButton = "antibot-button";
-            var antibotBtnArrayLength = await page.evaluate((classForAntibotButton) => {
-                var antibotBtnArray = Array.from(document.querySelectorAll("div > div.message-content-wrapper.can-select-text > div.InlineButtons > div > button")).filter(e => e.innerText === 'Soy Humano ');
-                if (antibotBtnArray.length > 0) {
-                    for (let i = 0; i < antibotBtnArray.length; i++) {
-                        antibotBtnArray[i].classList.add(classForAntibotButton + "-" + i);
-                    }
-                    return antibotBtnArray.length;
-                } else {
-                    return null
-                }
-            }, classForAntibotButton);
-
-            await new Promise((r) => { setTimeout(() => r("ok"), 10_000) });
-            if (antibotBtnArrayLength) {
-                for (let i = 0; i < antibotBtnArrayLength; i++) {
-                    await page.click("." + classForAntibotButton + "-" + i);
-                    //console.log("se dio click a: " + i);
-                    await new Promise(r => { setTimeout(() => { r(true) }, generateRandomNumber(1000, 3000)) })
-
-                }
-                var page1 = await browser.newPage();
-                await page.close();
-                page = page1;
-                await new Promise(r => { setTimeout(() => { r(true) }, generateRandomNumber(5000, 10000)) })
-                await page.goto('https://web.telegram.org/a/' + group_id);
-            }
-
-
-            resolve(classForAntibotButton);
-
-        })
-    }
+    /**
+ * Detecta mensaje anti‑spam hasta que expire el timeout.
+ *
+ * @param {number} timeoutMs Tiempo máximo en milisegundos para esperar el anti‑bot. Por defecto 2000 ms.
+ * @returns {Promise<{ anti: boolean, seconds: number }>}
+ */
+function antibot(timeoutMs = 2000) {
+    const startTime = Date.now();
+  
+    return new Promise(async resolve => {
+      // Sigue intentando hasta que se cumpla el timeout
+      while (Date.now() - startTime <= timeoutMs) {
+        const antibotResponse = await page.evaluate(() => {
+          const messages = document.querySelectorAll(
+            ".message-date-group.first-message-date-group > div"
+          );
+          const last = messages[messages.length - 1];
+          const txtNode = last?.querySelector(
+            "div div.text-content.clearfix.with-meta"
+          );
+          if (
+            txtNode?.innerText.includes(
+              "‍[𝑨𝑵𝑻𝑰𝑺𝑷𝑨𝑴] 𝑻𝒓𝒚 𝒂𝒈𝒂𝒊𝒏 𝒂𝒇𝒕𝒆𝒓 "
+            )
+          ) {
+            return {
+              anti: true,
+              milliseconds:1000* parseInt(txtNode.innerText.match(/\d+'/)[0], 10)
+            };
+          }
+          return { anti: false, milliseconds: 0 };
+        });
+  
+        if (antibotResponse.anti) {
+          // Resuelve y sale inmediatamente
+          return resolve(antibotResponse);
+        }
+        // opcional: pequeña pausa para no saturar CPU
+        await new Promise(r => setTimeout(r, 200));
+      }
+  
+      // timeout expirado sin detectar anti‑bot
+      resolve({ anti: false, milliseconds: 0 });
+    });
+  }
+  
 
     /* MANEJAR TARJETAS */
 
@@ -201,7 +211,7 @@ import { getConfig } from "./modules/getConfig.js";
         var startTime = Date.now();
         const maxTime = 4000; // límite inferior para el tiempo transcurrido
 
-        await antibot();
+
 
 
         /*     var checkingCards=await getCheckingCards();
@@ -210,7 +220,7 @@ import { getConfig } from "./modules/getConfig.js";
         var cardsStatuses = await getCardsStatuses();
 
 
-        for (let i = cardsStatuses.length - 1; i >= 0 ; i--) {
+        for (let i = cardsStatuses.length - 1; i >= 0; i--) {
             var queue = getQueue();
             if (queue.length < 1) break;
             //console.log(i+1)
@@ -279,6 +289,13 @@ import { getConfig } from "./modules/getConfig.js";
 
 
                 await sendCardToCheck(cmmd);
+                var timeoutAntibot=2000;
+                var resAntibot= await antibot(timeoutAntibot);
+                if (resAntibot.anti) {
+                    console.log("Antibot esperando "+(resAntibot.milliseconds-timeoutAntibot)+" ms");
+                    await waitForTimeout(resAntibot.milliseconds-timeoutAntibot);
+                    await sendCardToCheck(cmmd);
+                };
                 addCard(cardString);
                 cupos--;
             }
