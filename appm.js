@@ -92,8 +92,8 @@ import { getConfig } from "./modules/getConfig.js";
 
     /* const defaultBrowserContext = browser.defaultBrowserContext(); */
     /*   const pages = await browser.pages(); */
-    //let pages = await browser.pages(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
-    let page = await browser.newPage();
+    let pages = await browser.pages(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
+    let page = pages[0];
     await page.goto('https://web.telegram.org/a/', { timeout: 180_000 });
     await page.waitForSelector("#root", { timeout: 180_000 });
 
