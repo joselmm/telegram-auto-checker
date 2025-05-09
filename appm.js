@@ -290,7 +290,7 @@ function antibot(timeoutMs = 2000) {
 
 
                 await sendCardToCheck(cmmd);
-                var timeoutAntibot=3000;
+                var timeoutAntibot=6000;
                 var resAntibot= await antibot(timeoutAntibot);
                 if (resAntibot.anti) {
                     console.log("Antibot esperando "+(resAntibot.milliseconds-resAntibot.spentTime)+" ms");
