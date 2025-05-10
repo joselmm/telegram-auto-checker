@@ -288,8 +288,6 @@ import { getConfig } from "./modules/getConfig.js";
             var cmmd = `${gate} ${cardString}`;
             if (cardString) {
 
-
-                await sendCardToCheck(cmmd);
                 /* var timeoutAntibot=6000;
                 var resAntibot= await antibot(timeoutAntibot);
                 if (resAntibot.anti) {
@@ -298,10 +296,10 @@ import { getConfig } from "./modules/getConfig.js";
                     await sendCardToCheck(cmmd);
                 }; */
 
-                await waitForTimeout(to_wait_card_send);
                 await sendCardToCheck(cmmd);
                 addCard(cardString);
                 cupos--;
+                await waitForTimeout(to_wait_card_send);
             }
             /*  } */
 
