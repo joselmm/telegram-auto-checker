@@ -141,47 +141,47 @@ import { getConfig } from "./modules/getConfig.js";
  * @param {number} timeoutMs Tiempo máximo en milisegundos para esperar el anti‑bot. Por defecto 2000 ms.
  * @returns {Promise<{ anti: boolean, seconds: number }>}
  */
-function antibot(timeoutMs = 2000) {
-    const startTime = Date.now();
-  
-    return new Promise(async resolve => {
-      // Sigue intentando hasta que se cumpla el timeout
-      while (Date.now() - startTime <= timeoutMs) {
-        const antibotResponse = await page.evaluate(() => {
-          const messages = document.querySelectorAll(
-            ".message-date-group.first-message-date-group > div"
-          );
-          const last = messages[messages.length - 1];
-          const txtNode = last?.querySelector(
-            "div div.text-content.clearfix.with-meta"
-          );
-          if (
-            txtNode?.innerText.includes(
-              "‍[𝑨𝑵𝑻𝑰𝑺𝑷𝑨𝑴] 𝑻𝒓𝒚 𝒂𝒈𝒂𝒊𝒏 𝒂𝒇𝒕𝒆𝒓 "
-            )
-          ) {
-            return {
-              anti: true,
-              milliseconds:1000* parseInt(txtNode.innerText.match(/\d+'/)[0], 10)
-            };
-          }
-          return { anti: false, milliseconds: 0,  };
-        });
-  
-        if (antibotResponse.anti) {
+    function antibot(timeoutMs = 2000) {
+        const startTime = Date.now();
+
+        return new Promise(async resolve => {
+            // Sigue intentando hasta que se cumpla el timeout
+            while (Date.now() - startTime <= timeoutMs) {
+                const antibotResponse = await page.evaluate(() => {
+                    const messages = document.querySelectorAll(
+                        ".message-date-group.first-message-date-group > div"
+                    );
+                    const last = messages[messages.length - 1];
+                    const txtNode = last?.querySelector(
+                        "div div.text-content.clearfix.with-meta"
+                    );
+                    if (
+                        txtNode?.innerText.includes(
+                            "‍[𝑨𝑵𝑻𝑰𝑺𝑷𝑨𝑴] 𝑻𝒓𝒚 𝒂𝒈𝒂𝒊𝒏 𝒂𝒇𝒕𝒆𝒓 "
+                        )
+                    ) {
+                        return {
+                            anti: true,
+                            milliseconds: 1000 * parseInt(txtNode.innerText.match(/\d+'/)[0], 10)
+                        };
+                    }
+                    return { anti: false, milliseconds: 0, };
+                });
+
+                if (antibotResponse.anti) {
+                    var now = Date.now();
+                    // Resuelve y sale inmediatamente
+                    return resolve({ ...antibotResponse, spentTime: now - startTime });
+                }
+                // opcional: pequeña pausa para no saturar CPU
+                await new Promise(r => setTimeout(r, 200));
+            }
             var now = Date.now();
-          // Resuelve y sale inmediatamente
-          return resolve({...antibotResponse, spentTime:now-startTime});
-        }
-        // opcional: pequeña pausa para no saturar CPU
-        await new Promise(r => setTimeout(r, 200));
-      }
-      var now = Date.now();
-      // timeout expirado sin detectar anti‑bot
-      resolve({ anti: false, milliseconds: 0, spentTime:now-startTime });
-    });
-  }
-  
+            // timeout expirado sin detectar anti‑bot
+            resolve({ anti: false, milliseconds: 0, spentTime: now - startTime });
+        });
+    }
+
 
     /* MANEJAR TARJETAS */
 
@@ -290,13 +290,16 @@ function antibot(timeoutMs = 2000) {
 
 
                 await sendCardToCheck(cmmd);
-                var timeoutAntibot=6000;
+                /* var timeoutAntibot=6000;
                 var resAntibot= await antibot(timeoutAntibot);
                 if (resAntibot.anti) {
                     console.log("Antibot esperando "+(resAntibot.milliseconds-resAntibot.spentTime)+" ms");
                     await waitForTimeout(resAntibot.milliseconds-resAntibot.spentTime);
                     await sendCardToCheck(cmmd);
-                };
+                }; */
+
+                await waitForTimeout(to_wait_card_send);
+                await sendCardToCheck(cmmd);
                 addCard(cardString);
                 cupos--;
             }
