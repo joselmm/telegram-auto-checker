@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/joselmm/telegram-auto-checker#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.19.2",
     "node-fetch": "^2.7.0",

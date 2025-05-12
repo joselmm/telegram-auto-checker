@@ -389,6 +389,7 @@ import { getConfig } from "./modules/getConfig.js";
                     live: ele.innerText.includes("[𒈒] 𝑺𝒕𝒂𝒕𝒖𝒔 ➵ Approved") ? true : false,
                     cardInfo: ele.innerText.includes("\[𒈒\] 𝑰𝒏𝒇𝒐 ➵ ") ? ele.innerText.match(/\[𒈒\] 𝑰𝒏𝒇𝒐 ➵ ([^\n]*)/)[0].split("[𒈒] 𝑰𝒏𝒇𝒐 ➵ ")[1] : "No Info",
                     bankName: ele.innerText.includes("\[𒈒\] 𝑩𝒂𝒏𝒌 ➵ ") ? ele.innerText.match(/\[𒈒\] 𝑩𝒂𝒏𝒌 ➵ ([^\n]*)/)[0].split("[𒈒] 𝑩𝒂𝒏𝒌 ➵ ")[1] : "No Info",
+                    country: ele.innerText.includes("\[𒈒\] 𝑪𝒐𝒖𝒏𝒕𝒓𝒚 ➵ ") ? ele.innerText.match(/\[𒈒\] 𝑪𝒐𝒖𝒏𝒕𝒓𝒚 ➵ [^\n]*/)[0].split("[𒈒] 𝑪𝒐𝒖𝒏𝒕𝒓𝒚 ➵ ")[1] : "No Info",
                     card: ele.innerText.match(regexCard)[0],
                     date: generateDate()
                 }
@@ -495,6 +496,7 @@ import { getConfig } from "./modules/getConfig.js";
         message += "*Card:* `" + liveCardObj.card + "`\n";
         message += "*Card Info:* `" + liveCardObj.cardInfo + "`\n";
         message += "*Bank Name:* `" + liveCardObj.bankName + "`\n";
+        message += "*Country:* `" + liveCardObj.country + "`\n";
         message += "*Message:* `" + liveCardObj.message + "`\n";
         message += "*Date:* `" + liveCardObj.date + "`\n";
         message += "*Bin:* `" + binList[temporalBinIndex] + "`\n";
