@@ -131,8 +131,8 @@ async function startChecking({ binsString, gate, group_id, person_chat_id, bot_t
 
         /* const defaultBrowserContext = browser.defaultBrowserContext(); */
         /*   const pages = await browser.pages(); */
-        let page = await browser.newPage(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
-
+        let pages = await browser.pages(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
+        let page = pages[0];
         await page.goto('https://web.telegram.org/a/', { timeout: 180_000 });
         await page.waitForSelector("#root", { timeout: 180_000 });
 
