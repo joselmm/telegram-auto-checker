@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
-import { readFile, writeFile } from 'node:fs/promises';
+
 import os from "node:os"
 import fetch from "node-fetch";
 import { parse } from 'node-html-parser';
@@ -10,6 +10,7 @@ import cors from "cors";
 import { resolve } from 'node:path';
 import { chromium } from 'playwright-core';
 import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 const app = express()
 const port = process.env.PORT || 3000;
@@ -34,15 +35,25 @@ app.post("/start-checking", (req, res) => {
 
 
 
-app.listen(port, () => {
+app.listen(port,async () => {
     console.log(`Checker escuchando en el puerto ${port}`)
+
+
+    if(!existsSync("./localStorage.json")){
+        var localStorageRes = await fetch(process.env.localStorage);
+        var lsContent = localStorageRes.text();
+        writeFileSync("./localStorage.json",lsContent);
+        console.log("Se escribio el localStorage.json")
+
+        
+    }
 })
 
 var browserRef = null;
 
 
 async function startChecking({ binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin }) {
-debugger
+
     try {
         checking = true;
 
@@ -123,7 +134,7 @@ debugger
         await page.goto('https://web.telegram.org/a/', { timeout: 180_000 });
         await page.waitForSelector("#root", { timeout: 180_000 });
 
-        var localStorageBuffer = await readFile(resolve("./localStorage.json"))
+        var localStorageBuffer =  readFileSync(resolve("./localStorage.json"))
         var localStorageJSON = localStorageBuffer.toString();
         if (localStorageJSON !== "") {
 
