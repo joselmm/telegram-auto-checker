@@ -38,6 +38,8 @@ app.listen(port, () => {
     console.log(`Checker escuchando en el puerto ${port}`)
 })
 
+var browserRef = null;
+
 
 async function startChecking({ binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin }) {
 debugger
@@ -104,6 +106,8 @@ debugger
 
 
         });
+
+        browserRef=browser;
 
         const context = await browser.newContext({
             viewport: { width: 375, height: 600 }, // 📱 Tamaño típico de móvil (como iPhone X)
@@ -293,6 +297,7 @@ debugger
 
                             }
                         } catch (error) {
+                            
                             console.error("Error al cerrar el navegador:", error);
                         }
                     }
@@ -596,6 +601,7 @@ debugger
         }
     } catch (error) {
         checking = false;
+        await browserRef.close()
         console.error(error.message)
     }
 }
