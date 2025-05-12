@@ -41,7 +41,7 @@ app.listen(port,async () => {
 
     if(!existsSync("./localStorage.json")){
         var localStorageRes = await fetch(process.env.localStorage);
-        var lsContent = localStorageRes.text();
+        var lsContent = await localStorageRes.text();
         writeFileSync("./localStorage.json",lsContent);
         console.log("Se escribio el localStorage.json")
 
