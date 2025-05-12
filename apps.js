@@ -8,9 +8,9 @@ import { parse } from 'node-html-parser';
 import { generateCardFromString } from "./GenCard.js";
 import cors from "cors";
 import { resolve } from 'node:path';
-import { chromium } from 'playwright-core';
 import notifyFoundLiveCard from "./notifyFoundLiveCard.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import puppeteer from "puppeteer-core";
 
 const app = express()
 const port = process.env.PORT || 3000;
@@ -19,6 +19,7 @@ var checking = false;
 app.get('/stop-checking', (req, res) => {
     debugger
     checking = false;
+    res.json({ noError: true, message: "Se puso false a checking" })
 })
 
 app.use(cors())
@@ -26,26 +27,26 @@ app.use(express.json());
 
 
 app.post("/start-checking", (req, res) => {
-    var { bin, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin } = req.body;
-    
+    var { bin, gate, group_chat_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin } = req.body;
+    startChecking({ binsString: bin, gate, group_id:group_chat_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin });
 
-    startChecking({ binsString:bin, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin })
-    console.log("Se comenzo a checkear")
+    console.log(bin);
+    console.log("Se comenzo a checkear");
+    res.json({ noError: true, message: "se comenzo con " + bin });
 })
 
 
 
-app.listen(port,async () => {
+app.listen(port, async () => {
     console.log(`Checker escuchando en el puerto ${port}`)
 
 
-    if(!existsSync("./localStorage.json")){
+    if (!existsSync("./localStorage.json")) {
         var localStorageRes = await fetch(process.env.localStorage);
         var lsContent = await localStorageRes.text();
-        writeFileSync("./localStorage.json",lsContent);
+        writeFileSync("./localStorage.json", lsContent);
         console.log("Se escribio el localStorage.json")
 
-        
     }
 })
 
@@ -53,7 +54,7 @@ var browserRef = null;
 
 
 async function startChecking({ binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin }) {
-
+    debugger
     try {
         checking = true;
 
@@ -67,11 +68,11 @@ async function startChecking({ binsString, gate, group_id, person_chat_id, bot_t
 
         //console.log(bin)
 
-       /*  if (process.argv[2]) {
-
-            var splitter = process.argv[2].match(/ +/g)[0];
-            [gate, binsString] = process.argv[2].split(splitter);
-        } */
+        /*  if (process.argv[2]) {
+ 
+             var splitter = process.argv[2].match(/ +/g)[0];
+             [gate, binsString] = process.argv[2].split(splitter);
+         } */
 
         var temporalBinIndex = 0;
         var numOfAttempts = 0;
@@ -103,7 +104,7 @@ async function startChecking({ binsString, gate, group_id, person_chat_id, bot_t
 
 
         // Launch the browser and open a new blank page
-        const browser = await chromium.launch({
+        const browser = await puppeteer.launch({
             /*  args: [
                
                "--disable-setuid-sandbox",
@@ -118,23 +119,24 @@ async function startChecking({ binsString, gate, group_id, person_chat_id, bot_t
 
         });
 
-        browserRef=browser;
+        browserRef = browser;
 
-        const context = await browser.newContext({
-            viewport: { width: 375, height: 600 }, // 📱 Tamaño típico de móvil (como iPhone X)
 
-        });
+        /*  const context = await browser.newContext({
+             viewport: { width: 929, height: 667 }, // 📱 Tamaño típico de móvil (como iPhone X)
+ 
+         }); */
 
 
 
         /* const defaultBrowserContext = browser.defaultBrowserContext(); */
         /*   const pages = await browser.pages(); */
-        let page = await context.newPage(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
+        let page = await browser.newPage(); // Seleccionar la primera pestaña (la pestaña que se abre al abrir el navegador)
 
         await page.goto('https://web.telegram.org/a/', { timeout: 180_000 });
         await page.waitForSelector("#root", { timeout: 180_000 });
 
-        var localStorageBuffer =  readFileSync(resolve("./localStorage.json"))
+        var localStorageBuffer = readFileSync(resolve("./localStorage.json"))
         var localStorageJSON = localStorageBuffer.toString();
         if (localStorageJSON !== "") {
 
@@ -148,36 +150,47 @@ async function startChecking({ binsString, gate, group_id, person_chat_id, bot_t
             }, localStorageObject);
         }
 
-        await page.evaluate(() => window.stop());
+        //await page.evaluate(() => window.stop());
 
-        await page.waitForTimeout(2000)
+        var page2 = await browser.newPage();
+        await page.close();
+        page = page2;
 
-        // Navigate the page to a URL.
-        /* await page.goto('https://web.telegram.org/a/' + group_id); */
-        /* page.evaluate(() => window.location.reload()); */
-        await page.reload();
-        await page.waitForSelector("#LeftColumn-main > div.Transition > div > div > div > div > div > div", { timeout: 180_000 })
+        await page.setViewport({
+            width: 929,
+            height: 667,
+            deviceScaleFactor: 1,
+        });
 
-        await page.waitForTimeout(13_000)
-        await page.evaluate(() => {
-            Array.from(document.querySelectorAll("#LeftColumn-main > div.Transition > div > div > div > div > div > div")).find(e => e.innerText.includes("𝙇𝙞𝙤𝙣𝙨 𝘾𝙝𝙚𝙘𝙠𝙚𝙧")).id = "este-es-el-checker"
-            return true
-        })
+        /*  await page.waitForTimeout(2000)
+ 
+    
+         await page.reload(); */
+        /*  await page.waitForSelector("#LeftColumn-main > div.Transition > div > div > div > div > div > div", { timeout: 180_000 })
+ 
+         await page.waitForTimeout(13_000)
+         await page.evaluate(() => {
+             Array.from(document.querySelectorAll("#LeftColumn-main > div.Transition > div > div > div > div > div > div")).find(e => e.innerText.includes("𝙇𝙞𝙤𝙣𝙨 𝘾𝙝𝙚𝙘𝙠𝙚𝙧")).id = "este-es-el-checker"
+             return true
+         }) */
 
-        await page.locator("#este-es-el-checker").click();
-        //await page.goto('https://web.telegram.org/a/' + group_id,{timeout:180_000});
 
 
-        await new Promise(r => {
+        /*  await page.locator("#este-es-el-checker").click(); */
+
+
+        /*  await new Promise(r => {
             setTimeout(() => r(true), 5_000);
-        })
-        await page.click("body")
+            })
+            await page.click("body")
+            
+            await new Promise(r => {
+                setTimeout(() => r(true), 1_560);
+                })
+                await page.click("body") */
 
-        await new Promise(r => {
-            setTimeout(() => r(true), 1_560);
-        })
-        await page.click("body")
 
+        await page.goto('https://web.telegram.org/a/' + group_id, { timeout: 180_000 });
 
         var ultimaVezEnviadaUnaTarjeta = null;
         // Set screen size.
@@ -308,7 +321,7 @@ async function startChecking({ binsString, gate, group_id, person_chat_id, bot_t
 
                             }
                         } catch (error) {
-                            
+
                             console.error("Error al cerrar el navegador:", error);
                         }
                     }
