@@ -46,8 +46,8 @@ debugger
 
 
         // Or import puppeteer from 'puppeteer-core';  
-        var binFileBuffer = await readFile(resolve("./env.txt"));
-        var binFileContent = binFileBuffer.toString();;
+        /* var binFileBuffer = await readFile(resolve("./env.txt"));
+        var binFileContent = binFileBuffer.toString();; */
         var countedLive = 0;
         //return console.log(JSON.stringify(binFileContent))
         //var [binsString, gate, group_id, person_chat_id, bot_token, num_to_find, to_wait_card_send, wait_to_begin, max_atemps_per_bin] = binFileContent.split("\r\n").map(e => e.split("=")[1])
